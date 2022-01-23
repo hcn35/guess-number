@@ -26,6 +26,22 @@
             <button class="hint btn">Hint!</button>
             <button class="play-again btn">Again!</button>
           </div>
+          <div class="modal hidden">
+            <button class="close-modal">&times;</button>
+            <h1 class="modal-heading">Hint</h1>
+            <p class="modal-text">
+              Instead of searching the number sequentially until the secret
+              number is found, use binary search. A binary search is a search
+              that finds the middle number of a sorted list recursively until
+              the middle number is equal to the target number. If the middle
+              number is less than the target number, narrow the list to the
+              upper-half of the original list and perform binary search on the
+              new list. If the middle number is greater than the target number,
+              narrow the list to the lower-half of the original list and perform
+              binary search on the new list.
+            </p>
+          </div>
+          <div class="overlay hidden"></div>
         </div>
         <div class="result-area">
           <p class="feedback">Start guessing...</p>

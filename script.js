@@ -1,63 +1,124 @@
 "use strict";
 
-const getRandomInt = function (min, max) {
+// Get elements
+const bodyEl = document.body;
+const answerBoxEl = document.querySelector(".answer-box");
+const numberInputEl = document.querySelector(".number-input");
+const checkAnswerEl = document.querySelector(".check-answer");
+const hintEl = document.querySelector(".hint");
+const playAgainEl = document.querySelector(".play-again");
+const feedbackEl = document.querySelector(".feedback");
+const scoreEl = document.querySelector(".score");
+const highscoreEl = document.querySelector(".highscore");
+const modal = document.querySelector(".modal");
+const overlay = document.querySelector(".overlay");
+const btnCloseModal = document.querySelector(".close-modal");
+
+// Define a function to get a secrect number
+const getSecrectNumber = function (min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
 };
 
-const deductScore = function () {
-  return Number(scoreSelector.textContent) - 1;
+// Define a function to display/hide check answer, hint, and play again buttons
+const displayButtons = function (checkAnswer, hint, playAgain) {
+  checkAnswerEl.style.display = checkAnswer;
+  hintEl.style.display = hint;
+  playAgainEl.style.display = playAgain;
 };
 
-let answer = getRandomInt(1, 101);
-const bodySelector = document.body;
-const answerBoxSelector = document.querySelector(".answer-box");
-const numberInputSelector = document.querySelector(".number-input");
-const checkAnswerSelector = document.querySelector(".check-answer");
-const hintSelector = document.querySelector(".hint");
-const playAgainSelector = document.querySelector(".play-again");
-const feedbackSelector = document.querySelector(".feedback");
-const scoreSelector = document.querySelector(".score");
-const highScoreSelector = document.querySelector(".highscore");
+// Define a function to change the text content of an element
+const changeTextContent = function (element, text) {
+  element.textContent = text;
+};
 
-playAgainSelector.style.display = "none";
+// Define a function to close the hint modal
+const closeModal = function () {
+  modal.classList.add("hidden");
+  overlay.classList.add("hidden");
+};
 
-let guess;
-checkAnswerSelector.addEventListener("click", function () {
-  guess = Number(numberInputSelector.value);
-  if (guess < 1 || guess > 1000) {
-    feedbackSelector.textContent = "Invalid number";
-    scoreSelector.textContent = deductScore();
-  } else if (guess < answer) {
-    feedbackSelector.textContent = "Too low!";
-    scoreSelector.textContent = deductScore();
-  } else if (guess > answer) {
-    feedbackSelector.textContent = "Too high!";
-    scoreSelector.textContent = deductScore();
+// Get a random number between 1 and 100 (inclusive)
+let answer = getSecrectNumber(1, 101);
+
+// Initialize score and highscore
+let score = 100;
+let highscore = 0;
+playAgainEl.style.display = "none";
+
+// Implement the check button
+checkAnswerEl.addEventListener("click", function () {
+  // Get number provided by player
+  const guess = Number(numberInputEl.value);
+
+  // No number is provided
+  if (!guess) {
+    changeTextContent(feedbackEl, "🚫 No number!");
+
+    // Number out of range is provided
+  } else if (guess < 1 || guess > 100) {
+    changeTextContent(feedbackEl, "❌ Invalid number");
+
+    // Valid number, but not correct
+  } else if (guess !== answer) {
+    changeTextContent(
+      feedbackEl,
+      guess < answer ? "📉 Too low!" : "📈 Too high!"
+    );
+
+    // Deduct score if score > 1
+    if (score > 1) {
+      score--;
+      changeTextContent(scoreEl, score);
+
+      // Lose game
+    } else {
+      changeTextContent(feedbackEl, "😞 You lost the game");
+      changeTextContent(scoreEl, 0);
+      displayButtons("none", "none", "inline-block");
+    }
+
+    // Player provided the correct number
   } else {
-    bodySelector.style.backgroundColor = "#60b347";
-    answerBoxSelector.textContent = answer;
-    checkAnswerSelector.style.display = "none";
-    hintSelector.style.display = "none";
-    playAgainSelector.style.display = "inline-block";
-    feedbackSelector.textContent = "Correct Number";
-    if (
-      Number(scoreSelector.textContent) > Number(highScoreSelector.textContent)
-    ) {
-      highScoreSelector.textContent = Number(scoreSelector.textContent);
+    bodyEl.style.backgroundColor = "#60b347";
+    changeTextContent(answerBoxEl, answer);
+    displayButtons("none", "none", "inline-block");
+    changeTextContent(feedbackEl, "🎉 Correct Number");
+
+    // Update highscore
+    if (score > highscore) {
+      highscore = score;
+      changeTextContent(highscoreEl, highscore);
     }
   }
 });
 
-playAgainSelector.addEventListener("click", function () {
-  answer = getRandomInt(1, 101);
-  bodySelector.style.backgroundColor = "#222";
-  answerBoxSelector.textContent = "?";
-  numberInputSelector.value = "";
-  checkAnswerSelector.style.display = "inline-block";
-  hintSelector.style.display = "inline-block";
-  playAgainSelector.style.display = "none";
-  feedbackSelector.textContent = "Start guessing...";
-  scoreSelector.textContent = "100";
+// Implement play again button
+playAgainEl.addEventListener("click", function () {
+  answer = getSecrectNumber(1, 101);
+  score = 100;
+  bodyEl.style.backgroundColor = "#222";
+  changeTextContent(answerBoxEl, "?");
+  numberInputEl.value = "";
+  displayButtons("inline-block", "inline-block", "none");
+  changeTextContent(feedbackEl, "Start guessing...");
+  changeTextContent(scoreEl, "100");
+});
+
+// Show hint modal
+hintEl.addEventListener("click", function () {
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+});
+
+// Close hint modal
+btnCloseModal.addEventListener("click", closeModal);
+
+overlay.addEventListener("click", closeModal);
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+    closeModal();
+  }
 });
